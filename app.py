@@ -1,13 +1,18 @@
 # -*- coding: UTF-8 -*-
 
-import requests, json, re
+import requests
+import json
+import re
 from bs4 import BeautifulSoup
 
-start = 4800
-end = start + 51
+start = 5000
+end = start + 500
+
+locat = "./output/"
 
 songs = []
-outFileURL = "results.json"
+outFileName = "c_" + str(start) + "_" + str(end - 1) + ".json"
+outFileURL = locat + outFileName
 outFile = open(outFileURL, "w")
 
 processCounter = 1
@@ -16,7 +21,8 @@ ran = end - start
 print()
 for i in range(start, end):
     try:
-        result = requests.get("http://www.christianstudy.com/data/hymns/text/c" + str(i) + ".html")
+        result = requests.get(
+            "http://www.christianstudy.com/data/hymns/text/c" + str(i) + ".html")
         result.encoding = "big5"
 
         soup = BeautifulSoup(result.text, "html.parser")
@@ -30,13 +36,13 @@ for i in range(start, end):
                 "lyricist": "",
                 "composer": "",
                 "translator": ""
-        }
+                }
         ss = []
         for s in sel:
             ss.append(s.text.split("\n\r\n"))
-        
+
         song["id_"] = str(i)
-        song["title"] = ss[0][0].replace("【","").replace("】","")
+        song["title"] = ss[0][0].replace("【", "").replace("】", "")
 
         for part in ss[1]:
             part = part.splitlines()
@@ -47,37 +53,60 @@ for i in range(start, end):
                     p.append(line)
             song["lyrics"].append(p)
 
-        head_ = str(pick[0]).splitlines()[1].replace("</p>", "").replace("\x02", "").replace(" ", "")
-        print("\"" + head_ + "\"")
+        head_ = str(pick[0]).splitlines()[1].replace(
+            "</p>", "").replace("\x02", "").replace(" ", "")
+        # print("\"" + head_ + "\"")
         head = re.split(u"\u3000" + "|<br/>" + "|；" + "|／", head_)
-        print(head)
-        
+
         for h in head:
-            if h.find("詩集：") != -1:
-                song["album"] = h.replace("詩集：", "")
-            elif h.find("曲、詞：") != -1 or h.find("詞、曲：") != -1 or h.find("詞曲：") != -1 or h.find("曲詞：") != -1 or h.find("曲/詞：") != -1 or h.find("詞/曲：") != -1:
-                h = h.replace("曲、詞：", "").replace("詞、曲：", "").replace("曲詞：", "").replace("詞曲：", "").replace("曲/詞：", "").replace("詞/曲：", "")
+
+            album_l = ["詩集："]
+            l_c = ["曲、詞：", "詞、曲：", "詞曲：", "曲詞：", "曲/詞：", "詞/曲："]
+            trans = ["中譯詞：", "譯詞：", "中譯：", "譯者：", "譯："]
+            ly = ["填詞：", "作詞：", "詞："]
+            co = ["作曲：", "曲："]
+
+            if any(re.findall('|'.join(album_l), h)):
+                for rep in album_l:
+                    h = h.replace(rep, "")
+                song["album"] = h
+
+            elif any(re.findall('|'.join(l_c), h)):
+                for rep in l_c:
+                    h = h.replace(rep, "")
                 song["lyricist"] = h
                 song["composer"] = h
-            elif h.find("中譯詞：") != -1 or h.find("譯詞：") != -1 or h.find("譯：") != -1 or h.find("譯者：") != -1 or h.find("中譯：") != -1:
-                h = h.replace("中譯詞：", "").replace("譯詞：", "").replace("中譯：", "").replace("譯者：", "").replace("譯：", "")
+
+            elif any(re.findall('|'.join(trans), h)):
+                for rep in trans:
+                    h = h.replace(rep, "")
                 song["translator"] = h
-            elif h.find("詞：") != -1 or h.find("填詞：") != -1 or h.find("作詞：") != -1:
-                song["lyricist"] = h.replace("填詞：", "").replace("作詞：", "").replace("詞：", "")
-            elif h.find("曲：") != -1 or h.find("作曲：") != -1:
-                if h.find("編曲") == -1:
-                    song["composer"] = h.replace("作曲：", "").replace("曲：", "")
+
+            elif any(re.findall('|'.join(ly), h)):
+                for rep in ly:
+                    h = h.replace(rep, "")
+                song["lyricist"] = h
+
+            elif any(re.findall('|'.join(co), h)):
+                for rep in co:
+                    if h.find("編曲") == -1:
+                        h = h.replace(rep, "")
+                song["composer"] = h
 
         header = []
 
         # print(pick[0].split("<br>").text.splitlines()[1])
         songs.append(song)
-        print("編號：" + str(i) + " - 歌曲資料擷取成功")
-    except:
-        print("編號：" + str(i) + " - 歌曲資料擷取失敗")
+        f = (processCounter/ran) * 100
+        print("[ %.1f" % (f) + "% ] " + "編號：" + str(i) + " - 歌曲資料擷取成功")
+        processCounter += 1
+    except Exception as error:
+        f = (processCounter/ran) * 100
+        print("[ %.1f" % (f) + "% ] " + "編號：" +
+              str(i) + " - 歌曲資料擷取失敗：\n" + str(error))
+        processCounter += 1
+    print()
+
     
-    f = (processCounter/ran) * 100
-    print("( %.2f"% (f) + "% )\n")
-    processCounter += 1
 
 outFile.write(json.dumps(songs, ensure_ascii=False))
