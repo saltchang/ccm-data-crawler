@@ -38,20 +38,10 @@ $ pip freeze
 beautifulsoup4==4.7.1
 certifi==2019.3.9
 chardet==3.0.4
-Click==7.0
-Flask==1.0.2
-get==2019.3.22
 idna==2.8
-itsdangerous==1.1.0
-Jinja2==2.10
-MarkupSafe==1.1.1
-post==2019.3.22
-public==2019.3.22
-query-string==2019.3.22
 requests==2.21.0
-soupsieve==1.9
+soupsieve==1.9.1
 urllib3==1.24.2
-Werkzeug==0.15.1
 ```
 
 ## 使用方法
@@ -70,6 +60,13 @@ end   代表結束的歌曲編號，最大 5000
 爬蟲完畢會將歌曲資料存成 JSON
 
 輸出檔案位於 ```./output/```
+
+若要退出 venv，使用以下指令：
+
+```shell
+
+$ deactivate
+```
 
 ## 範例
 
