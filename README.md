@@ -1,7 +1,7 @@
-# Song Crawler
+# CCM Data Crawler
 
-一個很簡單的 Python 爬蟲程式，
-從 [武林英雄帖](http://www.christianstudy.com) 網站爬取基督教詩歌的程式。
+這是一個簡單的 Python 爬蟲程式，
+從 [武林英雄帖](http://www.christianstudy.com) 網站爬取基督教詩歌。
 
 ## 安裝
 
@@ -18,7 +18,7 @@ $ cd songs-crawler
 
 註：請先在電腦安裝 Python3
 
-建立虛擬環境 venv：
+建立虛擬環境 venv 並且安裝需求套件：
 
 ```shell
 
@@ -51,24 +51,28 @@ urllib3==1.24.2
 ```shell
 
 $ python songs_crawler.py [start] [end]
+
 ```
 
 其中：
+
 start 代表開始的歌曲編號，最小 1000
+
 end   代表結束的歌曲編號，最大 5000
 
 爬蟲完畢會將歌曲資料存成 JSON
 
-輸出檔案位於 ```./output/```
+輸出檔案位於 `output/`
 
 若要退出 venv，使用以下指令：
 
 ```shell
 
 $ deactivate
+
 ```
 
-## 範例
+## 使用範例
 
 ```shell
 
